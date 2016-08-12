@@ -1,0 +1,4 @@
+# file sudoers-sysadmins
+# installed by ansible
+User_Alias	SYSADMINS = dha,eskender,melvinw
+SYSADMINS	ALL = NOPASSWD: ALL
