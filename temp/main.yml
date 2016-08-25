@@ -1,0 +1,200 @@
+# file: roles/centos7/tasks/main.yml
+
+# Pre-requistie
+# libselinux-python 
+- name: package libselinux-python
+  yum: name=libselinux-python state=present
+
+- name: turn off selinux
+  selinux: state=disabled
+
+- name: make sure that SELinux stays disabled
+  lineinfile: dest=/etc/selinux/config regexp=^SELINUX= line=SELINUX=disabled
+
+- name: package perl
+  yum: name=perl state=present
+
+- name: package openssh-clients
+  yum: name=openssh-clients state=present
+
+- name: gather distro repos
+  shell: find /etc/yum.repos.d -type f \( -name "CentOS*.repo" \)
+  register: distrepo
+  ignore_errors: yes
+
+# Clean up built-in repos
+- name: clean up built-in repos
+  with_items: distrepo.stdout_lines
+  file: path={{ item }} state=absent
+  ignore_errors: yes
+
+# enable Stanford CentOS mirror
+- name: copy Stanford Centos repo
+  copy: src=centos_repo.txt dest=/etc/yum.repos.d/stanford_centos.repo
+
+# enable Stanford EL mirror
+- name: copy Stanford EL repo
+  copy: src=stanford-el_repo.txt dest=/etc/yum.repos.d/stanford_el.repo
+
+# enable Stanford EPEL mirror
+- name: copy Stanford EPEL repo
+  copy: src=stanford-epel_repo.txt dest=/etc/yum.repos.d/stanford_epel.repo
+
+# enable Fedora EPEL mirror
+- name: install extra packages from Fedora Project
+  yum: name=http://lbre-utilstor.stanford.edu/rpm/epel-release-latest-7.noarch.rpm state=present
+  when: (ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7')
+
+- name: uncomment baseurl in epel.repo
+  replace: dest=/etc/yum.repos.d/epel.repo regexp='#baseurl' replace='baseurl'
+
+- name: set proxy in epel.repo
+  with_items: reponame.stdout_lines
+  lineinfile: dest=/etc/yum.repos.d/epel.repo regexp='proxy=' insertafter='epel-7' line='proxy=http://lbre-server-proxy.stanford.edu:3128/' backup=yes
+
+- name: comment out mirrorlist in epel.repo
+  replace: dest=/etc/yum.repos.d/epel.repo regexp='^mirrorlist' replace='# mirrorlist'
+
+- name: replace download.fedoraproject.org to dl.fedoraproject.org
+  replace: dest=/etc/yum.repos.d/epel.repo regexp='download.fedoraproject' replace='dl.fedoraproject'
+
+# YUM utilities for cleaning up /boot
+- name: install yum-utils
+  yum: name=yum-utils state=present
+
+# YUM autoremove for removing un-needed dependent packages
+- name: install yum remove-with-leaves
+  yum: name=yum-plugin-remove-with-leaves state=present
+
+- name: disable YUM fastestmirror
+  replace: dest=/etc/yum/pluginconf.d/fastestmirror.conf regexp='enabled=1' replace='enabled=0'
+
+- name: limit YUM kernels to 2
+  replace: dest=/etc/yum.conf regexp='installonly_limit=5' replace='installonly_limit=2'
+
+# verify adapter ONBOOT (pending - done by kickstart for now )
+# verify adapter BOOTPROTO (pending - done by kickstart for now)
+# verify for firewalld (leave it for individual service to define)
+
+- name: set hostname to {inventory_hostname}
+  hostname: name={{inventory_hostname}}
+
+- name: set ROOT with the system-name
+  user: name=root comment='{{inventory_hostname}} Root'
+
+# some other basic packages
+- name: install manpages
+  yum: name=man state=present
+
+- name: install iostat
+  yum: name=sysstat state=present
+
+# ntp
+- name: install ntp 
+  yum: name=ntp state=present
+
+- name: copy ntp config file
+  copy: src=ntp.conf dest=/etc/ntp.conf backup=yes
+  notify:
+    - restart ntpd
+
+- name: ensure that ntp service is enabled
+  service: name=ntpd enabled=yes
+## Kerberos
+
+- name: first remove the original package
+  yum: name=pam_krb5 state=absent
+
+- name: now install SU kerberos auth
+  yum: name=krb5-workstation state=present
+
+- name: install latest krb5.conf
+  command: curl -o /etc/krb5.conf http://web.stanford.edu/dept/its/support/kerberos/dist/krb5.conf
+#creates=/etc/krb5.conf
+
+- name: install stanford pam-krb5 lib
+  yum: name=pam_krb5-SU state=present
+
+# enable pam kerberos the hard way (don't want to run authconfig each time)
+- name: copy password-auth-ac
+  copy: src=password-auth-ac dest=/etc/pam.d/password-auth-ac
+- name: copy system-auth-ac
+  copy: src=system-auth-ac   dest=/etc/pam.d/system-auth-ac
+- name: now fis the symlink for system-auth
+  command: ln -sf /etc/pam.d/system-auth-ac /etc/pam.d/system-auth
+- name: now fix the symlik for password-auth
+  command: ln -sf /etc/pam.d/password-auth-ac /etc/pam.d/password-auth
+
+# other packages
+- name: install lsof
+  yum: name=lsof state=present
+
+
+# Accounts and sudoers file are now done through kickstart
+# Add procedures here for verifications
+
+- name: create Arne.D Account
+  user: name=dha uid=1000 groups=wheel comment="Arne Dietrich (LBRE-TSG)"
+
+- name: create Melvin.W Account
+  user: name=melvinw uid=1001 groups=wheel comment="Melvin Wong (LBRE-TSG)"
+
+- name: create Eskender.T Account
+  user: name=eskender uid=1002 groups=wheel comment="Eskender Tafesse (LBRE-TSG)"
+
+# CIS-CAT (parts of recommended settings)
+#
+- name: copy limits.conf
+  copy: src=limits.conf dest=/etc/security/limits.conf owner=root group=root mode=0644
+
+- name: copy sysctl.conf
+  copy: src=sysctl.conf dest=/etc/sysctl.conf owner=root group=root mode=0644
+
+- name: copy init
+  copy: src=init dest=/etc/sysconfig/init owner=root group=root mode=0644
+
+- name: copy main.cf restart postfix
+  copy: src=main.cf dest=/etc/postfix/main.cf owner=root group=root mode=0644
+  notify:
+    - restart postfix
+
+- name: copy /etc/pam.d/su
+  copy: src=su dest=/etc/pam.d/su owner=root group=root mode=0644
+
+- name: check the owner and the mode of crontab
+  file: path=/etc/crontab owner=root group=root mode=0600
+
+- name: check the owner and the mode of cron.hourly
+  file: path=/etc/cron.hourly owner=root group=root mode=0600
+
+- name: check the owner and the mode of cron.daily
+  file: path=/etc/cron.daily owner=root group=root mode=0600
+
+- name: check the owner and the mode of cron.weekly
+  file: path=/etc/cron.weekly owner=root group=root mode=0600
+
+- name: check the owner and the mode of cron.monthly
+  file: path=/etc/cron.monthly owner=root group=root mode=0600
+
+- name: check the owner and the mode of cron.d
+  file: path=/etc/cron.d state=directory owner=root group=root mode=0600
+
+- name: change loglevel of SSHD to INFO
+  replace: dest=/etc/ssh/sshd_config regexp='#LogLevel INFO' replace='LogLevel INFO'
+
+- name: change MaxAuthTries of SSHD from 6 to 4
+  replace: dest=/etc/ssh/sshd_config regexp='#MaxAuthTries 6' replace='MaxAuthTries 4'
+
+# removed until we get sudo and kerberos sorted out
+#- name: change PermitRootLogin of SSHD from yes to no
+#  replace: dest=/etc/ssh/sshd_config regexp='#PermitRootLogin yes' replace='PermitRootLogin no'
+
+- name: change X11Forwarding of SSHD from yes to no
+  replace: dest=/etc/ssh/sshd_config regexp='X11Forwarding yes' replace='X11Forwarding no'
+
+- name: insert allowed Ciphers in SSHD
+  lineinfile: dest=/etc/ssh/sshd_config insertafter=EOF regexp='Ciphers' line='Ciphers aes128-ctr,aes192-ctr,aes256-ctr'
+  notify:
+  - restart sshd
+
+# eof

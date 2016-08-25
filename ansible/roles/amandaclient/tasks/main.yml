@@ -1,0 +1,54 @@
+# Install Amanda Client
+- name: check if amanda-backup_client is installed for CentOS 6
+  yum: name=http://lbre-utilstor.stanford.edu/amanda/amanda-backup_client-3.3.7-1.rhel6.x86_64.rpm disable_gpg_check=yes state=present
+  when: ansible_distribution_major_version == '6'
+
+- name: check if amanda-backup_client is installed for CentOS 7
+  yum: name=http://lbre-utilstor.stanford.edu/amanda/amanda-backup_client-3.3.7-1.rhel7.x86_64.rpm disable_gpg_check=yes state=present
+  when: ansible_distribution_major_version == '7'
+
+# Exchange SSH Keys
+- name: check if Amanda user SSH directory exists
+  file: path=/var/lib/amanda/.ssh state=directory owner=amandabackup mode=0711
+
+- name: copy Amanda backup server public key
+  copy: src=id_amandabackup_rsa.pub dest=/var/lib/amanda/.ssh/authorized_keys
+
+- name: check the owner and the mode of authorized keys
+  file: path=/var/lib/amanda/.ssh/authorized_keys owner=amandabackup group=disk mode=0600
+
+# Firewall
+- name: check firewall rule for Amanda
+  shell: iptables -L -n | grep -q '10080' && echo -n yes || echo -n no
+  register: check_allow_amanda
+  changed_when: no
+  when: ansible_distribution_major_version == '6'
+
+- name: Add Amanda backup to iptables
+  command: >
+          iptables -I INPUT 1 -p tcp -m tcp --dport 10080
+          -m comment --comment "Amanda" -j ACCEPT
+  when: (ansible_distribution_major_version == '6' and check_allow_amanda.stdout == "no")
+  notify:
+  - save iptables
+
+- name: Add Amanda to firewalld
+  firewalld: port=10080/tcp permanent=true zone=public state=enabled
+  when: (ansible_distribution_major_version == '7' and check_allow_amanda.stdout == "no")
+  notify:
+  - firewalld reload
+
+# Check XInetd 
+- name: check xinetd configuration exists
+  file: path=/etc/xinetd.d/amandaclient state=file
+
+- name: change authentication from bsdtcp to ssh
+  replace: dest=/etc/xinetd.d/amandaclient regexp='-auth=bsdtcp' replace='-auth=ssh' 
+
+# Copy amanda-client configuration
+- name: copy amanda-client conf over
+  copy: src=amanda-client.conf dest=/etc/amanda/amanda-client.conf
+
+# Restart xinetd
+- name: Restart xinetd
+  service: name=xinetd state=restarted

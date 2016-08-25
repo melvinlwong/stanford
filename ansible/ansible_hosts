@@ -1,0 +1,90 @@
+[localhost]
+localhost ansible_connection=local
+
+[centos7]
+lbre-testing3 ansible_ssh_host=171.64.144.21
+lbre-testing4 ansible_ssh_host=171.64.144.86
+lbre-sesi-mlw02 ansible_ssh_host=10.200.74.26
+mlw-fusion1 ansible_ssh_host=192.168.30.131 ansible_user=root
+mlw-fusion2 ansible_ssh_host=192.168.30.146 ansible_user=root
+mlw-fusion3 ansible_ssh_host=192.168.30.140 ansible_user=root
+lbre-mlw03 ansible_ssh_host=171.64.144.18
+lbre-mlw04 ansible_ssh_host=171.64.144.28
+lbre-sesi-stor1 ansible_ssh_host=10.200.76.5
+lbre-sesi-stor2 ansible_ssh_host=10.200.76.6
+
+[centos6]
+tsg-melvinw-rh ansible_ssh_host=10.200.54.57
+lbre-vm51 ansible_ssh_host=171.64.144.20
+lbre-vm52 ansible_ssh_host=171.64.144.23
+lbre-vm53 ansible_ssh_host=171.64.144.24
+lbre-flexlm ansible_ssh_host=171.64.144.82
+lbre-monitor ansible_ssh_host=171.64.144.36
+lbre-utilstor ansible_ssh_host=171.64.144.32
+bondata5 ansible_ssh_host=171.64.144.54
+lbre-vmh2-dr ansible_ssh_host=172.20.226.11
+bondata2 ansible_ssh_host=171.64.144.53
+bondata ansible_ssh_host=171.64.144.50
+lbre-mge ansible_ssh_host=171.64.144.91
+lbre-pats-repo-prod ansible_ssh_host=171.64.144.101
+lbre-oraapp-3 ansible_ssh_host=171.64.144.27
+lbre-oraapp-4 ansible_ssh_host=171.64.144.30
+lbre-mlw02 ansible_ssh_host=171.64.144.10
+lbre-sesi-mlw01 ansible_ssh_host=10.200.74.22
+lbre-sesi-vm01 ansible_ssh_host=10.200.74.24
+lbre-monitoring ansible_ssh_host=171.64.144.52
+lbre-cf1 ansible_ssh_host=171.64.144.107
+lbre-cf4 ansible_ssh_host=171.64.144.204
+lbre-wallet ansible_ssh_host=171.64.144.26
+lbre-netboot ansible_ssh_host=171.64.144.155
+lbre-sesi-forwarder2 ansible_ssh_host=10.200.74.23
+lbre-sesi-forwarder1 ansible_ssh_host=10.200.74.21
+lbre-proxy1 ansible_ssh_host=171.64.144.71
+lbre-proxy2 ansible_ssh_host=171.64.144.17
+lbre-edna-proxy ansible_ssh_host=171.64.144.35
+lbre-sesi-netboot ansible_ssh_host=10.200.74.22
+lbre-sesi-netmon1 ansible_ssh_host=10.200.74.27
+lbre-sesi-stor4 ansible_ssh_host=10.200.76.15
+lbre-sesi-stor5 ansible_ssh_host=10.200.76.16
+
+
+[ubuntu-old]
+lbre-internal2 ansible_ssh_host=171.64.144.85
+fac-web1-dev ansible_ssh_host=171.64.144.37
+fac-webdev ansible_ssh_host=171.64.144.44
+lbre-web2 ansible_ssh_host=171.64.144.228
+fac-mailgate ansible_ssh_host=171.64.144.134
+fac-web3 ansible_ssh_host=171.64.144.142
+lbre-haproxy ansible_ssh_host=171.64.144.102
+nagios-porter ansible_ssh_host=171.64.144.35
+fac-web1 ansible_ssh_host=171.64.144.73
+
+[windows2008]
+lbre-mlw01.stanford.edu
+
+[dev-duo]
+lbre-vm52.stanford.edu ansible_ssh_host=171.64.144.23
+lbre-mlw02 ansible_ssh_host=171.64.144.10
+lbre-cf4-dev ansible_ssh_host=171.64.144.31
+lbre-cf4-prod ansible_ssh_host=171.64.144.79
+lbre-cf5-dev ansible_ssh_host=171.64.144.61
+lbre-srv004 ansible_ssh_host=171.64.144.12
+
+[prod-duo]
+lbre-cf4 ansible_ssh_host=171.64.144.204
+lbre-flexlm ansible_ssh_host=171.64.144.82
+lbre-netboot ansible_ssh_host=171.64.144.155
+lbre-pats-repo-prod ansible_ssh_host=171.64.144.101
+lbre-proxy1 ansible_ssh_host=171.64.144.71
+lbre-proxy2 ansible_ssh_host=171.64.144.17
+lbre-srv004 ansible_ssh_host=171.64.144.12
+lbre-srv006 ansible_ssh_host=171.64.144.33
+lbre-utilstor ansible_ssh_host=171.64.144.32
+lbre-monitor ansible_ssh_host=171.64.144.36
+lbre-notnetbackup ansible_ssh_host=171.64.144.43
+lbre-monitoring ansible_ssh_host=171.64.144.52
+
+[proxies]
+lbre-proxy1 ansible_ssh_host=171.64.144.71
+lbre-proxy2 ansible_ssh_host=171.64.144.17
+lbre-mlw02 ansible_ssh_host=171.64.144.10

@@ -1,0 +1,18 @@
+#
+[os]
+name=os
+baseurl=http://yum.stanford.edu/mrepo/centos6-x86_64/RPMS.os
+gpgkey = http://yum.stanford.edu/RPM-GPG-KEY-CentOS-6
+http_proxy = http://lbre-server-proxy.stanford.edu:3128
+
+[updates]
+name=updates
+baseurl=http://yum.stanford.edu/mrepo/centos6-x86_64/RPMS.updates
+gpgkey = http://yum.stanford.edu/RPM-GPG-KEY-CentOS-6
+http_proxy = http://lbre-server-proxy.stanford.edu:3128
+
+[extras]
+name=extras
+baseurl=http://yum.stanford.edu/mrepo/centos6-x86_64/RPMS.extras
+gpgkey = http://yum.stanford.edu/RPM-GPG-KEY-CentOS-6
+http_proxy = http://lbre-server-proxy.stanford.edu:3128

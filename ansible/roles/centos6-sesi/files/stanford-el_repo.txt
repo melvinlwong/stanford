@@ -1,0 +1,20 @@
+# Name: Stanford RPMs for EL
+# URL: http://yum.stanford.edu/
+#
+[stanford]
+name = Stanford RPMs for EL$releasever $basearch
+baseurl = http://yum.stanford.edu/mrepo/stanford-EL6-$basearch/RPMS.updates
+enabled = 1
+protect = 0
+gpgkey = http://yum.stanford.edu/STANFORD-GPG-KEY
+gpgcheck = 1
+http_proxy = http://lbre-server-proxy.stanford.edu:3128
+
+[stanford-noarch]
+name = Stanford RPMs for EL$releasever noarch
+baseurl = http://yum.stanford.edu/mrepo/stanford-EL6-noarch/RPMS.updates
+enabled = 1
+protect = 0
+gpgkey = http://yum.stanford.edu/STANFORD-GPG-KEY
+gpgcheck = 1
+http_proxy = http://lbre-server-proxy.stanford.edu:3128

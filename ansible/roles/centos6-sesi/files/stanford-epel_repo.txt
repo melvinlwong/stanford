@@ -1,0 +1,20 @@
+# Name: epel EL6 repo
+# URL: http://yum.stanford.edu/
+#
+[epel-updates]
+name = EPEL packages $releasever
+baseurl = http://yum.stanford.edu/mrepo/epel-EL6-$basearch/RPMS.updates
+enabled = 1
+protect = 0
+gpgkey = http://yum.stanford.edu/RPM-GPG-KEY-EPEL-6
+gpgcheck = 1
+http_proxy = http://lbre-server-proxy.stanford.edu:3128
+
+[epel-all]
+name = EPEL packages $releasever
+baseurl = http://yum.stanford.edu/mrepo/epel-EL6-$basearch/RPMS.all
+enabled = 1
+protect = 0
+gpgkey = http://yum.stanford.edu/RPM-GPG-KEY-EPEL-6
+gpgcheck = 1
+http_proxy = http://lbre-server-proxy.stanford.edu:3128

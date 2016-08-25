@@ -1,0 +1,14 @@
+# file: roles/rhel6/handlers/main.yml
+- name: restart iptables
+  service: name=iptables state=reloaded
+
+- name: restart ntpd
+  service: name=ntpd state=restarted
+
+- name: restart sshd
+  service: name=sshd state=restarted
+
+- name: restart postfix
+  service: name=postfix state=restarted
+#eof
+

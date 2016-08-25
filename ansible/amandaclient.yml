@@ -1,0 +1,9 @@
+- hosts: 
+    centos7
+    centos6
+
+  environment:
+    http_proxy: http://lbre-server-proxy.stanford.edu:3128
+
+  roles:
+     - amandaclient
