@@ -7,8 +7,8 @@
 
   vars_prompt:
     - name: "virtualhostname"
-      prompt: "type in the virtualhostname:"
-      default: ""
+      prompt: "type [hostname | no] "
+      default: "no"
       private: no
 
     - name: "indexing"
@@ -21,4 +21,4 @@
 
   roles:
     - { role: nginx }
-    - { role: nginx-vhost, when: vhost is defined }
+    - { role: nginx-vhost, when: vhost != 'no' }

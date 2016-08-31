@@ -1,5 +1,5 @@
-- name: copy vhost.conf to virtual-hostnmae.conf
-  copy: src=vhost.conf dest=/etc/nginx/conf.d/{{ vhost }}.conf
+- name: copy vhost.conf to virtual-hostname.conf
+  get_url: url=http://lbre-utilstor.stanford.edu/nginx/vhost.conf dest=/etc/nginx/conf.d/{{ vhost }}.conf owner=root group=root mode=0644 force=yes
 
 - name: apply virtual-hostname to virtual-host config
   replace: dest=/etc/nginx/conf.d/{{ vhost }}.conf regexp=VHOST replace={{ vhost }}
@@ -10,8 +10,11 @@
 - name: verify if /var/www/html/virtual-hostname - directory exists
   file: path=/var/log/nginx/{{ vhost }} state=directory mode=0755 owner=root group=root
 
-- name: copy vhost.conf to virtual-hostnmae.conf
-  copy: src=robots.txt dest=/var/www/html/{{ vhost }}/robots.txt
+- name: copy robots.txt to virtual-hostname directory
+  get_url: url=http://lbre-utilstor.stanford.edu/nginx/robots.txt dest=/var/www/html/{{ vhost }}/robots.txt owner=root group=root mode=0644 force=yes
 
 - name: apply indexing to virtual-host config
   replace: dest=/etc/nginx/conf.d/{{ vhost }}.conf regexp=INDEX replace={{ indexing }}
+
+- name: verify if nginx is running and reload the service
+  service: name=nginx state=reloaded enabled=yes
