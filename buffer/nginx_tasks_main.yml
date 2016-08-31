@@ -1,0 +1,60 @@
+- name: verify if nginx package is installed
+  yum: name=nginx
+
+- name: verify if /var/www/html- directory exists
+  file: path=/var/www/html state=directory mode=0755 owner=root group=root
+
+- name:  Decrease Nginx client connections
+  replace: dest=/etc/nginx/nginx.conf regexp='worker_connections\s1024' replace="worker_connections 768"
+
+- name: Disable temporary buffer size for Nginx to serve 2GB+ files
+  lineinfile: dest=/etc/nginx/conf.d/default.conf regexp="proxy_max_temp_file_size" state=present insertafter="server_name"
+    line='\tproxy_max_temp_file_size 0;'
+
+- name: Disable server signature for Nginx
+  lineinfile: dest=/etc/nginx/conf.d/default.conf regexp="server_tokens" state=present insertafter="server_name"
+    line='\tserver_tokens off;'
+
+- name: Define document root for Nginx
+  replace: dest=/etc/nginx/conf.d/default.conf regexp='root\s\s\s/usr/share/nginx/html' replace="root   /var/www/html"
+
+- name: Configure default server to be read-only
+  blockinfile: 
+    dest: /etc/nginx/conf.d/default.conf
+    insertbefore: "charset koi8-r"
+    block: |
+      if ($request_method !~ ^(GET|HEAD)$ ) {
+        return 444;
+      }
+
+- name: Copy robots.txt to document root
+  copy: src=robots.txt dest=/var/www/html/robots.txt owner=root group=root mode=0644
+
+- name: check if any http or https is defined in iptable and save as variable
+  shell: iptables -L -n | grep -q "80" && echo -n yes || echo -n no
+  register: check_allow_https
+  changed_when: no
+  always_run: yes
+
+- name: Add nginx/httpd to iptables if it does not exist
+  command: >
+            iptables -I INPUT 1 -p tcp -m tcp --dport 443
+            -m comment --comment "allow https" -j ACCEPT
+  when: check_allow_https.stdout == "no"
+
+- name: check if any http or https is defined in iptable and save as variable
+  shell: iptables -L -n | grep -q "443" && echo -n yes || echo -n no
+  register: check_allow_http
+  changed_when: no
+  always_run: yes
+
+- name: Add nginx/httpd to iptables if it does not exist
+  command: >
+            iptables -I INPUT 1 -p tcp -m tcp --dport 80
+            -m comment --comment "allow http" -j ACCEPT
+  when: check_allow_http.stdout == "no"
+  notify:
+  - save iptables
+
+- name: verify if nginx is running and is enabled upon restarts
+  service: name=nginx state=started enabled=yes

@@ -1,0 +1,51 @@
+- name: verify if nginx package is installed
+  yum: name=nginx
+
+- name: verify if /var/www/html- directory exists
+  file: path=/var/www/html state=directory mode=0755 owner=root group=root
+
+- name: Copy customized nginx.conf to /etc/nginx
+  get_url: url=http://lbre-utilstor.stanford.edu/nginx/nginx.conf dest=/etc/nginx/nginx.conf owner=root group=root mode=0644 force=yes
+
+- name: Copy customized default.conf to /etc/nginx/conf.d
+  get_url: url=http://lbre-utilstor.stanford.edu/nginx/default.conf dest=/etc/nginx/conf.d/default.conf owner=root group=root mode=0644 force=yes
+
+- name: Copy robots.txt to document root
+  get_url: url=http://lbre-utilstor.stanford.edu/nginx/robots.txt dest=/var/www/html/robots.txt owner=root group=root mode=0644 force=yes
+
+- name: Copy index.html to document root
+  get_url: url=http://lbre-utilstor.stanford.edu/nginx/index.html dest=/usr/share/nginx/html/index.html owner=root group=root mode=0644 force=yes
+
+- name: Copy 404.txt to document root
+  get_url: url=http://lbre-utilstor.stanford.edu/nginx/404.html dest=/usr/share/nginx/html/404.html owner=root group=root mode=0644 force=yes
+
+- name: Copy robots.txt to document root
+  get_url: url=http://lbre-utilstor.stanford.edu/nginx/50x.html dest=/usr/share/nginx/html/50x.html owner=root group=root mode=0644 force=yes
+
+- name: check if any http or https is defined in iptable and save as variable
+  shell: iptables -L -n | egrep -q '80' && echo -n yes || echo -n no
+  register: c6_http
+  when: ansible_distribution_major_version == "6"
+  always_run: yes
+
+- name: Check nginx/http in firewalld
+  shell: firewall-cmd --list-all | grep -q '80' && echo -n yes || echo -n no
+  register: c7_http
+  when: ansible_distribution_major_version == "7"
+
+- name: Display http
+  debug: var=c6_http
+
+- name: Add nginx/httpd to iptables
+  command: >
+           iptables -I INPUT 1 -p tcp -m tcp --dport 80 -m comment --comment "allow http" -j ACCEPT
+  when: (ansible_distribution_major_version == "6" and c6_http.stdout == 'no')
+  notify:
+  - save iptables
+
+- name: Add http to firewalld
+  firewalld: port=80/tcp permanent=true zone=public state=enabled immediate=yes
+  when: (ansible_distribution_major_version == "7" and c7_http.stdout == "no")
+
+- name: verify if nginx is running and is enabled upon restarts
+  service: name=nginx state=started enabled=yes

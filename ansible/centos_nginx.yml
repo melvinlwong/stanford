@@ -1,0 +1,24 @@
+- hosts:
+    centos6
+    centos7
+
+  environment:
+    http_proxy: http://lbre-server-proxy.stanford.edu:3128
+
+  vars_prompt:
+    - name: "virtualhostname"
+      prompt: "type in the virtualhostname:"
+      default: ""
+      private: no
+
+    - name: "indexing"
+      prompt: "should indexing be on: on|off"
+      default: "off"
+      private: no
+
+  vars:
+    vhost: "{{ virtualhostname }}"
+
+  roles:
+    - { role: nginx }
+    - { role: nginx-vhost, when: vhost is defined }

@@ -1,0 +1,17 @@
+- name: copy vhost.conf to virtual-hostnmae.conf
+  copy: src=vhost.conf dest=/etc/nginx/conf.d/{{ vhost }}.conf
+
+- name: apply virtual-hostname to virtual-host config
+  replace: dest=/etc/nginx/conf.d/{{ vhost }}.conf regexp=VHOST replace={{ vhost }}
+
+- name: verify if /var/www/html/virtual-hostname - directory exists
+  file: path=/var/www/html/{{ vhost }} state=directory mode=0755 owner=root group=root
+
+- name: verify if /var/www/html/virtual-hostname - directory exists
+  file: path=/var/log/nginx/{{ vhost }} state=directory mode=0755 owner=root group=root
+
+- name: copy vhost.conf to virtual-hostnmae.conf
+  copy: src=robots.txt dest=/var/www/html/{{ vhost }}/robots.txt
+
+- name: apply indexing to virtual-host config
+  replace: dest=/etc/nginx/conf.d/{{ vhost }}.conf regexp=INDEX replace={{ indexing }}

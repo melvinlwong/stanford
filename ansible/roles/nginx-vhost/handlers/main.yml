@@ -1,0 +1,5 @@
+- name: save iptables
+  shell: /sbin/service iptables save
+
+- name: firewalld reload
+  shell: /usr/bin/firewall-cmd --reload

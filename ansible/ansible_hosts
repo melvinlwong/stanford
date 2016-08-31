@@ -12,6 +12,9 @@ lbre-mlw03 ansible_ssh_host=171.64.144.18
 lbre-mlw04 ansible_ssh_host=171.64.144.28
 lbre-sesi-stor1 ansible_ssh_host=10.200.76.5
 lbre-sesi-stor2 ansible_ssh_host=10.200.76.6
+lbre-stor03 ansible_ssh_host=171.64.144.49
+lbre-stor02 ansible_ssh_host=171.64.144.64
+lbre-stor01 ansible_ssh_host=171.64.144.65
 
 [centos6]
 tsg-melvinw-rh ansible_ssh_host=10.200.54.57
